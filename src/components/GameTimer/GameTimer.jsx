@@ -1,8 +1,9 @@
-import React from "react";
-function GameTimer(props) {
-  return (
-    <div class="component GameTimer"> GameTimer </div>
-  )
-}
+import React from 'react';
+
+const GameTimer = (props) => (
+  <div>
+    GameTimer
+  </div>
+);
 
 export default GameTimer;

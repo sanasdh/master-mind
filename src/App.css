@@ -1,8 +1,6 @@
 .App {
-  text-align: center;
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  grid-template-rows: repeat(6, 1fr);
+  display: flex;
+  flex-direction: column;
 }
 
 .App-header {
@@ -13,19 +11,5 @@
   font-size: 40px;
   text-align: center;
 }
-.ColorPicker{
-  grid-area: 1/8/span 1/span 1;
 
-}
-.GameTimer{
-  grid-area: 2/8/ span 1/ span 1;
-}
-.NewGameButton{
-  grid-area: 3/8/ span 1/ span 1;
-}
-footer{
-  grid-area: 6/1/ span 1/ span 8;
-}
-.Borad{
-  grid-area: 1/1/ span 5/ span 7; 
-}
+

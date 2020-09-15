@@ -1,7 +1,9 @@
-import React from "react";
-function NewGameButton(props) {
-  return (
-    <div class="component NewGameButton"> NewGameButton</div>
-  )
-}
+import React from 'react';
+
+const NewGameButton = (props) => (
+  <div>
+    NewGameButton
+  </div>
+);
+
 export default NewGameButton;

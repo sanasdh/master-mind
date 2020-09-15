@@ -1,9 +1,9 @@
-import React from "react"
-function GuessScore(props) {
-  return (
-    <deiv class="component GuessScore"> GuessScore
-    </deiv>
-  )
-}
+import React from 'react';
+
+const GuessScore = (props) => (
+  <div>
+    GuessScore
+  </div>
+);
 
 export default GuessScore;
