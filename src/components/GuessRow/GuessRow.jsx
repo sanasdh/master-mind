@@ -19,7 +19,7 @@ const GuessRow = (props) => (
     />
     {
       props.currentGuess ?
-        <ScoreButton /> :
+        <ScoreButton disabled={props.guess.code.includes(null)} /> :
         <GuessScore score={props.guess.score} />
     }
   </div>
