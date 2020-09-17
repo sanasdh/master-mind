@@ -1,6 +1,7 @@
 import React from 'react';
 import GuessPeg from '../GuessPeg/GuessPeg';
 import './GuessPegs.css';
+// styling was added
 
 const GuessPegs = (props) => (
   <div className='GuessPegs'>
