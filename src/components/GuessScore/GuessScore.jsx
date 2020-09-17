@@ -1,17 +1,19 @@
 import React from 'react';
-import "./GuessScore.css"
+import './GuessScore.css';
+
 const GuessScore = ({ score }) => {
   let scores = ('P'.repeat(score.perfect) + 'A'.repeat(score.almost) +
     'I'.repeat(4 - score.perfect - score.almost)).split('');
-  const baseStyle = {
-    width: 10, // we don't need to specify it as 10px
+
+  let baseStyle = {
+    width: 10,
     height: 10,
     margin: 1,
     border: '2px solid',
-    borderStyle: 'solid',
-    borderRadius: '50%' //%must be string
+    borderRadius: '50%'
   };
-  const pegStyles = {
+
+  let pegStyles = {
     'P': {
       borderColor: 'black',
       backgroundColor: 'black'
@@ -25,9 +27,14 @@ const GuessScore = ({ score }) => {
       backgroundColor: 'lightgrey'
     }
   };
+
   return (
-    <div className="GuessScore">
-      {scores.map((score, idx) => <div key={idx} style={{ ...baseStyle, ...pegStyles[score] }}></div>)}
+    <div className='GuessScore'>
+      {scores.map((score, idx) =>
+        <div
+          key={idx}
+          style={{ ...baseStyle, ...pegStyles[score] }} />
+      )}
     </div>
   );
 }
