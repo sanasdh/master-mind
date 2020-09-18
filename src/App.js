@@ -8,14 +8,15 @@ import NewGameButton from './components/NewGameButton/NewGameButton';
 const colors = ['#7CCCE5', '#FDE47F', '#E04644', '#B576AD'];
 
 class App extends Component {
-  constructor(props) {
+  constructor() {
     // super must be called before accessing 'this'
-    super(props);
+    super();
     // state is an object that holds information
     // in its properties
     this.state = this.initializing();
     this.handleColorSelection = this.handleColorSelection.bind(this)
     this.handleInitializing = this.handleInitializing.bind(this)
+    // this.handleScore = this.handleScore.bind(this)
   }
   initializing() {
     return {
@@ -31,16 +32,67 @@ class App extends Component {
   getNewGuess() {
     return {
       code: [null, null, null, null],
-      // code: [3, 2, 1, 0], // for testing purposes
       score: {
         perfect: 0,
         almost: 0
       }
     };
   }
+  handlePegColor = (idx) => {
+    let currentIdx = this.state.guesses.length - 1;
+    let guessCopy = [...this.state.guesses]
+    let currentGuess = { ...guessCopy[currentIdx] }
+    let code = [...currentGuess.code]
+    // console.log("currentIdx", currentIdx);
+    // console.log(("guessCopy", guessCopy));
+    // console.log("currentGuess", currentGuess);
+    // console.log("code", code);
+    code[idx] = this.state.selColorIdx;
+    // console.log("code after", code);
+    currentGuess.code = code;
+    // console.log("currentGuessafter", currentGuess);
+    guessCopy[currentIdx] = currentGuess;
+    // console.log(("guessCopy after", guessCopy));
+    this.setState({
+      guesses: guessCopy,
+    })
+  }
+  handleScore = () => {
+    console.log("here");
+    // e.preventDefault()
+    let currentIdx = this.state.guesses.length - 1;
+    let guessCopy = [...this.state.guesses];
+    let currentGuess = { ...guessCopy[currentIdx] };
+    let score = { ...currentGuess.score }
+    console.log("currentIdx", currentIdx);
+    console.log(("guessCopy", guessCopy));
+    console.log("currentGuess", currentGuess);
+    let winnerCode = this.state.code
+    console.log("winnerCode", winnerCode);
 
+    currentGuess.code.forEach(function (code, idx) {
+      console.log("winnerCode[]", winnerCode[idx]);
+
+      if (code == winnerCode[idx]) {
+        score.perfect = score.perfect + 1
+        console.log("here");
+      } else if (code != winnerCode[idx] && winnerCode.includes(code)) {
+        score.almost++
+      }
+
+    })
+    currentGuess.score = score
+    console.log("score.perfect", score.perfect);
+    guessCopy[currentIdx] = currentGuess;
+    console.log(("guessCopy after", guessCopy));
+    this.setState({
+      guesses: guessCopy,
+    })
+  }
   genCode() {
-    return new Array(4).fill().map(dummy => Math.floor(Math.random() * 4));
+    let x = new Array(4).fill().map(dummy => Math.floor(Math.random() * 4));
+    console.log("x", x);
+    return x
   }
 
   getWinTries() {
@@ -69,6 +121,8 @@ class App extends Component {
           <GameBoard
             colors={colors}
             guesses={this.state.guesses}
+            handlePegColor={this.handlePegColor}
+            handleScore={this.handleScore}
           />
           <div className='App-controls'>
             <ColorPicker
