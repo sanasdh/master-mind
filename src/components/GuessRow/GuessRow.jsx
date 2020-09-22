@@ -8,7 +8,7 @@ const GuessRow = (props) => (
   <div className={styles.GuessRow}>
     <div
       className={styles.rowNum}
-      style={{ color: props.currentGuess ? 'black' : 'lightgrey' }}
+      style={{color: props.currentGuess ? 'black' : 'lightgrey'}}
     >
       {props.rowIdx + 1}
     </div>
@@ -16,13 +16,13 @@ const GuessRow = (props) => (
       colors={props.colors}
       code={props.guess.code}
       currentGuess={props.currentGuess}
-      handlePegColor={props.handlePegColor}
-
-
+      handlePegClick={props.handlePegClick}
     />
     {
-      props.currentGuess ?
-        <ScoreButton disabled={props.guess.code.includes(null)} handleScore={props.handleScore}
+      props.currentGuess && props.guess.score.perfect !== 4 ?
+        <ScoreButton
+          disabled={props.guess.code.includes(null)}
+          handleScoreClick={props.handleScoreClick}
         /> :
         <GuessScore score={props.guess.score} />
     }
