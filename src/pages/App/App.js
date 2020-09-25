@@ -1,26 +1,44 @@
 import React, { Component } from 'react';
 import './App.css';
-// import GameBoard from '../../components/GameBoard/GameBoard';
-// import ColorPicker from '../../components/ColorPicker/ColorPicker';
-// import GameTimer from '../../components/GameTimer/GameTimer';
-// import NewGameButton from '../../components/NewGameButton/NewGameButton';
-import GamePage from '../GamePage/GamePage';
-import SettingPage from '../SettingPage/SettingPage'
 import { Route, Switch } from 'react-router-dom';
+import GamePage from '../../pages/GamePage/GamePage';
+import SettingsPage from '../SettingsPage/SettingsPage';
+import HighScoresPage from '../HighScoresPage/HighScoresPage';
+import SignupPage from '../SignupPage/SignupPage';
+import LoginPage from '../LoginPage/LoginPage';
+import scoresService from '../../utils/scoresService';
+import userService from '../../utils/userService';
 
-const colors = ['#7CCCE5', '#FDE47F', '#E04644', '#B576AD'];
+const colors = {
+  Easy: ['#7CCCE5', '#FDE47F', '#E04644', '#B576AD'],
+  Moderate: ['#7CCCE5', '#FDE47F', '#E04644', '#B576AD', '#B7D968'],
+  Difficult: ['#7CCCE5', '#FDE47F', '#E04644', '#B576AD', '#B7D968', '#555E7B']
+};
 
 class App extends Component {
   constructor() {
     super();
-    this.state = this.getInitialState();
+    this.state = {
+      ...this.getInitialState(),
+      difficulty: 'Easy',
+      scores: [],
+      user: userService.getUser()
+    };
   }
-
+  handleLogout = () => {
+    userService.logout();
+    this.setState({ user: null });
+  }
+  handleSignupOrLogin = () => {
+    this.setState({ user: userService.getUser() });
+  }
   getInitialState() {
     return {
       selColorIdx: 0,
       guesses: [this.getNewGuess()],
-      code: this.genCode()
+      code: this.genCode(),
+      elapsedTime: 0,
+      isTiming: true
     };
   }
 
@@ -35,13 +53,34 @@ class App extends Component {
   }
 
   genCode() {
-    return new Array(4).fill().map(dummy => Math.floor(Math.random() * 4));
+    let numColors = this.state && colors[this.state.difficulty].length;
+    numColors = numColors || 4;
+    return new Array(4).fill().map(dummy => Math.floor(Math.random() * numColors));
   }
 
   getWinTries() {
     // if winner, return num guesses, otherwise 0 (no winner)
     let lastGuess = this.state.guesses.length - 1;
     return this.state.guesses[lastGuess].score.perfect === 4 ? lastGuess + 1 : 0;
+  }
+
+  isHighScore = (guessesCopy) => {
+    let lastScore = this.state.scores[this.state.scores.length - 1];
+    return (guessesCopy.length < lastScore.numGuesses || (
+      guessesCopy.length === lastScore.numGuesses &&
+      this.state.elapsedTime < lastScore.seconds
+    ));
+  }
+
+  /*--- Callback Methods ---*/
+
+  handleTimerUpdate = () => {
+    this.setState((curState) => ({ elapsedTime: ++curState.elapsedTime }));
+  }
+
+  handleDifficultyChange = (level) => {
+    // Use callback to ensure level is updated BEFORE calling handleNewGameClick
+    this.setState({ difficulty: level }, () => this.handleNewGameClick());
   }
 
   handleColorSelection = (colorIdx) => {
@@ -116,52 +155,99 @@ class App extends Component {
     let guessCopy = { ...guessesCopy[currentGuessIdx] };
     let scoreCopy = { ...guessCopy.score };
 
-    // Set scores
     scoreCopy.perfect = perfect;
     scoreCopy.almost = almost;
-
-    // Update the NEW guess with the NEW score object
     guessCopy.score = scoreCopy;
-
-    // Update the NEW guesses with the NEW guess object
     guessesCopy[currentGuessIdx] = guessCopy;
 
-    // Add a new guess if not a winner
-    if (perfect !== 4) guessesCopy.push(this.getNewGuess());
+    if (perfect === 4) {
+      // Chicken dinner - need to stop the timer!
+      this.setState(state => ({ isTiming: false }), async function () {
+        // Do high-score logic in this callback
+        if ((this.state.scores.length < 20 || this.isHighScore(guessesCopy))) {
+          let initials = prompt('Congrats you have a top-20 score! Enter your initials: ').substr(0, 3);
+          await scoresService.create({ initials, numGuesses: guessesCopy.length, seconds: this.state.elapsedTime });
+          this.props.history.push('/high-scores');
+        }
+      });
+    } else {
+      guessesCopy.push(this.getNewGuess());
+    }
 
-    // Finally, update the state with the NEW guesses array
     this.setState({
-      guesses: guessesCopy
+      guesses: guessesCopy,
+      // This is a great way to update isTiming
+      isTiming: perfect !== 4
     });
+  }
+
+  handleUpdateScores = (scores) => {
+    this.setState({ scores });
+  }
+
+  /*--- Lifecycle Methods ---*/
+
+  async componentDidMount() {
+    const scores = await scoresService.index();
+    this.setState({ scores });
   }
 
   render() {
     let winTries = this.getWinTries();
     return (
-
-      <div className="App">
-        <header className='App-header-footer'>R E A C T &nbsp;&nbsp;&nbsp;  M A S T E R M I N D</header>
+      <div>
+        <header className='header-footer'>R E A C T &nbsp;&nbsp;&nbsp;  M A S T E R M I N D</header>
         <Switch>
           <Route exact path='/' render={() =>
             <GamePage
+              user={this.state.user}
+              handleLogout={this.handleLogout}
               winTries={winTries}
-              colors={colors}
+              colors={colors[this.state.difficulty]}
               selColorIdx={this.state.selColorIdx}
               guesses={this.state.guesses}
+              elapsedTime={this.state.elapsedTime}
+              isTiming={this.state.isTiming}
               handleColorSelection={this.handleColorSelection}
               handleNewGameClick={this.handleNewGameClick}
               handlePegClick={this.handlePegClick}
               handleScoreClick={this.handleScoreClick}
+              handleTimerUpdate={this.handleTimerUpdate}
             />
           } />
-          <Route exact path="/settings/:id" render={(props) =>
-            <SettingPage {...props} />}
-          />
+          <Route exact path='/settings' render={props =>
+            <SettingsPage
+              {...props}
+              colorsLookup={colors}
+              difficulty={this.state.difficulty}
+              handleDifficultyChange={this.handleDifficultyChange}
+            />
+          } />
+          <Route exact path='/signup' render={({ history }) =>
+            <SignupPage
+              history={history}
+              handleSignupOrLogin={this.handleSignupOrLogin}
+
+            />
+          } />
+          <Route exact path='/login' render={(props) =>
+            <LoginPage
+              handleSignupOrLogin={this.handleSignupOrLogin}
+              {...props}
+
+
+            />
+          } />
+          <Route exact path='/high-scores' render={() =>
+            <HighScoresPage
+              scores={this.state.scores}
+              handleUpdateScores={this.handleUpdateScores}
+            />
+          } />
         </Switch>
       </div>
     );
   }
-
 }
 
 export default App;
