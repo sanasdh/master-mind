@@ -77,9 +77,14 @@ class App extends Component {
         score.perfect = score.perfect + 1
         console.log("here");
       } else if (code != winnerCode[idx] && winnerCode.includes(code)) {
+<<<<<<< HEAD
         // from here
         let index = winnerCode.indexOf(code)
 
+=======
+        // working here
+        let index = winnerCode.indexOf(code)
+>>>>>>> fda3be2583804315126fe8eea6bb6cfd55f7e422
         score.almost++
       }
 
