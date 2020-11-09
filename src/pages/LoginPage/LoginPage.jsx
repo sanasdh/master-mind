@@ -4,7 +4,7 @@ import './LoginPage.css';
 import userService from '../../utils/userService';
 
 class LoginPage extends Component {
-
+  
   state = {
     email: '',
     pw: ''
@@ -26,8 +26,8 @@ class LoginPage extends Component {
       // Successfully signed up - show GamePage
       this.props.history.push('/');
     } catch (err) {
-      // Invalid user data (probably duplicate email)
-      // this.props.updateMessage(err.message);
+      // Use a modal or toast in your apps instead of alert
+      alert('Invalid Credentials!');
     }
   }
 
